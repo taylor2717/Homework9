@@ -1,5 +1,5 @@
 ---
-title: "homework9"
+title: ""
 format: html
 editor: visual
 ---
@@ -454,7 +454,8 @@ vip(fit_rf) + ggplot2::ggtitle("Random Forest – Permutation Variable Importanc
 ### Best MLR from HW8
 
 ```{r, warning=FALSE}
-last_mlr <- last_fit(winner_wf, split = bike_split)
+last_mlr <- last_fit(winner_wf, split = bike_split,
+                     metrics = metric_set(rmse, mae, rsq))
 metrics_mlr <- collect_metrics(last_mlr)
 coef_mlr <- extract_fit_parsnip(last_mlr) %>% tidy()
 
@@ -463,13 +464,26 @@ coef_mlr <- extract_fit_parsnip(last_mlr) %>% tidy()
 ```{r}
 library(broom)
 
-# --- MLR coefficients (from lm) ---
+# --- MLR coefficients ---
+metrics_mlr <- collect_metrics(last_mlr)   # ensure MAE + RMSE exist
+mae_value <- metrics_mlr %>% 
+  filter(.metric == "mae") %>% 
+  pull(.estimate)
+
+rmse_value <- metrics_mlr %>% 
+  filter(.metric == "rmse") %>% 
+  pull(.estimate)
+
+cat("**Test RMSE:**", round(rmse_value, 2), "\n")
+cat("**Test MAE:**", round(mae_value, 2), "\n\n")
+
 coef_mlr <- last_mlr %>%
   extract_fit_parsnip() %>%
   tidy() %>%
   arrange(desc(abs(estimate)))
 
 knitr::kable(coef_mlr, digits = 3, caption = "MLR: Final model coefficients")
+
 
 ```
 
